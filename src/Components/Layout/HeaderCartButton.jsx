@@ -1,14 +1,44 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import CartIcon from "../Cart/CartIcon";
+import { useContext, useEffect, useState } from "react";
+import Cartcontext from "../../Store/cart-context";
 
 const HeaderCartButton = (props) => {
+  const cartCtx = useContext(Cartcontext);
+  const { items } = cartCtx;
+
+  const [btnIsHighlighted, setbtnIsHighlighted] = useState(false);
+
+  const numberOfCartItems = cartCtx.items.reduce((currentNumber, item) => {
+    return currentNumber + item.amount;
+  }, 0);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      return;
+    }
+    setbtnIsHighlighted(true);
+
+    const timer = setTimeout(() => {
+      setbtnIsHighlighted(false);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [items]);
+
   return (
-    <Button onClick={props.onClick}>
+    <Button
+      onClick={props.onClick}
+      className={btnIsHighlighted ? "new-class" : ""}
+      clicked={btnIsHighlighted}
+    >
       <Icon>
         <CartIcon></CartIcon>
       </Icon>
       <span>Your Cart</span>
-      <Badge>3</Badge>
+      <Badge>{numberOfCartItems}</Badge>
     </Button>
   );
 };
@@ -32,6 +62,30 @@ const Button = styled.button`
   :active {
     background-color: #2c0d00;
   }
+
+  ${(props) =>
+    props.clicked &&
+    css`
+      animation: bump 300ms ease-out;
+
+      @keyframes bump {
+        0% {
+          transform: scale(1);
+        }
+        10% {
+          transform: scale(0.9);
+        }
+        30% {
+          transform: scale(1.1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    `}
 `;
 
 const Icon = styled.div`
@@ -52,25 +106,3 @@ const Badge = styled.button`
     background-color: #92320c;
   }
 `;
-
-// const Bump = styled.div`
-//   animation: bump 300ms ease-out;
-
-//   @keyframes bump {
-//     0% {
-//       transform: scale(1);
-//     }
-//     10% {
-//       transform: scale(0.9);
-//     }
-//     30% {
-//       transform: scale(1.1);
-//     }
-//     50% {
-//       transform: scale(1.15);
-//     }
-//     100% {
-//       transform: scale(1);
-//     }
-//   }
-// `;
